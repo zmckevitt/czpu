@@ -78,7 +78,7 @@ impl Pipeline for Processor {
         // imm = word[9..0]
         #[inline]
         fn get_imm(word: &Word) -> u16 {
-            let imm: u16 = word[1] as u16 + word[0] as u16 << 8;
+            let imm: u16 = word[1] as u16 + (word[0] as u16) << 8;
             imm
         }
 
@@ -101,17 +101,24 @@ impl Pipeline for Processor {
             // RRI
             Opcode::ADDI | Opcode::SW | Opcode::LW | Opcode::BEQ | Opcode::JALR => {
                 Inst::RRI {
+                    // op = word[15..13]
                     op: op,
-                    ra: get_reg(&word, 12, 10), 
+                    // ra = word[15..13]
+                    ra: get_reg(&word, 12, 10),
+                    // rb = word[9..7]
                     rb: get_reg(&word, 9, 7),
+                    // simm = word[6..0]
                     simm: get_simm(&word),
                 }
             },
             // RI
             Opcode::LUI => {
                 Inst::RI {
+                    // op = word[15..13]
                     op: op,
+                    // ra = word[15..13]
                     ra: get_reg(&word, 12, 10),
+                    // imm = word[9..0]
                     imm: get_imm(&word),
                 }
             },
