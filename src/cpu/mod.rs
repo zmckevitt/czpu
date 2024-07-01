@@ -1,8 +1,8 @@
 mod arch;
 use crate::cpu::arch::*;
 
-mod superscalar;
-pub use crate::cpu::superscalar::*;
+mod scalar;
+pub use crate::cpu::scalar::*;
 
 pub fn run() {
 
