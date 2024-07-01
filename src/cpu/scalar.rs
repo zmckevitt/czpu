@@ -4,7 +4,7 @@ const MEM_SIZE: usize = 1024;
 
 pub struct Processor {
     pub pc: usize,
-    pub regs: [u8; 8],
+    pub regs: [u16; 8],
     pub mem: [u8; 256],
     pub tick: u64,
 }
@@ -75,10 +75,10 @@ impl Pipeline for Processor {
             simm 
         }
         
-        // simm = word[9..0]
+        // imm = word[9..0]
         #[inline]
         fn get_imm(word: &Word) -> u16 {
-            let imm: u16 = word[1] as u16 + word[0] as u16 >> 8;
+            let imm: u16 = word[1] as u16 + word[0] as u16 << 8;
             imm
         }
 
