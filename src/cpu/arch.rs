@@ -1,8 +1,8 @@
 // RiSC-16 ISA: https://user.eng.umd.edu/~blj/RiSC/RiSC-isa.pdf
 
-pub const WORD_SIZE: usize = 2;
+// pub const WORD_SIZE: usize = 2;
 
-pub type Word = [u8; WORD_SIZE];
+pub type Word = u16; 
 
 pub enum Opcode {
     ADD,

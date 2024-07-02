@@ -5,7 +5,7 @@ const MEM_SIZE: usize = 1024;
 pub struct Processor {
     pub pc: usize,
     pub regs: [u16; 8],
-    pub mem: [u8; 256],
+    pub mem: [u16; 256],
     pub tick: u64,
 }
 
@@ -19,16 +19,16 @@ pub trait Pipeline {
 
 impl Pipeline for Processor {
     fn fetch(&self) -> Word {
-        assert!(self.pc + WORD_SIZE < MEM_SIZE, "Trying to fetch outside memory!");
+        assert!(self.pc + 1 < MEM_SIZE, "Trying to fetch outside memory!");
         // Convert [u8] -> [u8; 16]
-        self.mem[self.pc..self.pc+WORD_SIZE].try_into().unwrap()
+        self.mem[self.pc]
     }
 
     fn decode(&self, word: &Word) -> Inst {
         // opcode = word[15..13]
         #[inline]
         fn get_opcode(word: &Word) -> Opcode {
-            let op: u8 = word[0] >> 5;
+            let op: u8 = (word >> 12) as u8;
             match op {
                 0b000 => Opcode::ADD,
                 0b001 => Opcode::ADDI,
@@ -45,17 +45,8 @@ impl Pipeline for Processor {
         // reg = word[i..j]
         #[inline]
         fn get_reg(word: &Word, i: usize, j: usize) -> Reg {
-
-            // Need to check if register is on boundary of the two u8s in the Word
-            let op: u8 = if(i > 8 && j < 8) {
-                word[0] >> j ^ word[1] >> (i - 8)
-            } else if (j < 8) {
-                word[1] >> j
-            } else {
-                word[0] >> (j - 8)
-            };
-
-            match op {
+            let reg = (word >> j) & (0b111 as u16);
+            match reg {
                 0b000 => Reg::r0,
                 0b001 => Reg::r1,
                 0b010 => Reg::r2,
@@ -71,14 +62,14 @@ impl Pipeline for Processor {
         // simm = word[6..0]
         #[inline]
         fn get_simm(word: &Word) -> i8 {
-            let simm: i8 = (word[1] as i8 & 0b11111100u8 as i8) >> 2;
+            let simm = ((word & (0b01111111u16)) as i8) << 1 >> 1;
             simm 
         }
         
         // imm = word[9..0]
         #[inline]
         fn get_imm(word: &Word) -> u16 {
-            let imm: u16 = word[1] as u16 + (word[0] as u16) << 8;
+            let imm: u16 = (((word >> 8) & 0b00000011) << 8) + (word & 0b11111111u16);
             imm
         }
 
